@@ -2,7 +2,7 @@ name: Pobierz CSV co godzinę
 
 on:
   schedule:
-    - cron: '0 * * * *'  # Co godzinę
+    - cron: '0 * * * *'  # co godzinę
   workflow_dispatch:
 
 jobs:
@@ -18,23 +18,24 @@ jobs:
 
       - name: Pobierz plik CSV i przetwórz
         run: |
-          php <<'PHP'
-          <?php
-          $username = getenv('FALKROSS_USER');
-          $password = getenv('FALKROSS_PASS');
-          $url = 'https://ws.falk-ross.eu/webservice/R03_000/stockinfo/falkross_de.csv';
+          echo "<?php
+          \$username = getenv('FALKROSS_USER');
+          \$password = getenv('FALKROSS_PASS');
+          \$url = 'https://ws.falk-ross.eu/webservice/R03_000/stockinfo/falkross_de.csv';
 
-          $ch = curl_init();
-          curl_setopt($ch, CURLOPT_URL, $url);
-          curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-          curl_setopt($ch, CURLOPT_USERPWD, "$username:$password");
-          $response = curl_exec($ch);
-          curl_close($ch);
+          \$ch = curl_init();
+          curl_setopt(\$ch, CURLOPT_URL, \$url);
+          curl_setopt(\$ch, CURLOPT_RETURNTRANSFER, true);
+          curl_setopt(\$ch, CURLOPT_USERPWD, \"\$username:\$password\");
+          \$response = curl_exec(\$ch);
+          curl_close(\$ch);
 
-          $lines = explode("\n", $response);
-          array_shift($lines);
-          file_put_contents("falkross_de_clean.csv", implode("\n", $lines));
-          PHP;
+          \$lines = explode(\"\\n\", \$response);
+          array_shift(\$lines);
+          file_put_contents(\"falkross_de_clean.csv\", implode(\"\\n\", \$lines));
+          ?>" > script.php
+
+          php script.php
 
       - name: Commit i push zmienionego pliku
         run: |
