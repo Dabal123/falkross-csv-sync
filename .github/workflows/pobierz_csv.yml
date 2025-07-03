@@ -19,7 +19,7 @@ jobs:
       - name: Zainstaluj PHP
         run: sudo apt-get install php-cli -y
 
-      - name: Pobierz plik CSV i przetwórz (z debugiem i logiem CURL)
+      - name: Pobierz plik CSV i przetwórz (z HTTPAUTH i logiem CURL)
         run: |
           echo "<?php
           \$username = getenv('FALKROSS_USER');
@@ -29,6 +29,7 @@ jobs:
           \$ch = curl_init();
           curl_setopt(\$ch, CURLOPT_URL, \$url);
           curl_setopt(\$ch, CURLOPT_RETURNTRANSFER, true);
+          curl_setopt(\$ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
           curl_setopt(\$ch, CURLOPT_USERPWD, \"\$username:\$password\");
           \$response = curl_exec(\$ch);
 
