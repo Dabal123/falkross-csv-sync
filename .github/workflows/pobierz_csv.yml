@@ -19,7 +19,7 @@ jobs:
       - name: Zainstaluj PHP
         run: sudo apt-get install php-cli -y
 
-      - name: Pobierz plik CSV i przetwórz (z debugiem)
+      - name: Pobierz plik CSV i przetwórz (z debugiem i logiem CURL)
         run: |
           echo "<?php
           \$username = getenv('FALKROSS_USER');
@@ -31,6 +31,13 @@ jobs:
           curl_setopt(\$ch, CURLOPT_RETURNTRANSFER, true);
           curl_setopt(\$ch, CURLOPT_USERPWD, \"\$username:\$password\");
           \$response = curl_exec(\$ch);
+
+          if(curl_errno(\$ch)) {
+              file_put_contents(\"curl_error.txt\", curl_error(\$ch));
+          } else {
+              file_put_contents(\"curl_error.txt\", \"Brak błędów CURL\");
+          }
+
           curl_close(\$ch);
 
           file_put_contents(\"response_raw.txt\", \$response);
@@ -48,6 +55,6 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add falkross_de_clean.csv response_raw.txt lines_count.txt
+          git add falkross_de_clean.csv response_raw.txt lines_count.txt curl_error.txt
           git commit -m "Aktualizacja CSV i debug `date`" || echo "Brak zmian"
           git push
