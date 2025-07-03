@@ -1,0 +1,45 @@
+name: Pobierz CSV co godzinę
+
+on:
+  schedule:
+    - cron: '0 * * * *'  # Co godzinę
+  workflow_dispatch:
+
+jobs:
+  fetch-and-commit:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Zainstaluj PHP
+        run: sudo apt-get install php-cli -y
+
+      - name: Pobierz plik CSV i przetwórz
+        run: |
+          php <<'PHP'
+          <?php
+          $username = getenv('FALKROSS_USER');
+          $password = getenv('FALKROSS_PASS');
+          $url = 'https://ws.falk-ross.eu/webservice/R03_000/stockinfo/falkross_de.csv';
+
+          $ch = curl_init();
+          curl_setopt($ch, CURLOPT_URL, $url);
+          curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+          curl_setopt($ch, CURLOPT_USERPWD, "$username:$password");
+          $response = curl_exec($ch);
+          curl_close($ch);
+
+          $lines = explode("\n", $response);
+          array_shift($lines);
+          file_put_contents("falkross_de_clean.csv", implode("\n", $lines));
+          PHP;
+
+      - name: Commit i push zmienionego pliku
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add falkross_de_clean.csv
+          git commit -m "Aktualizacja CSV `date`" || echo "Brak zmian"
+          git push
