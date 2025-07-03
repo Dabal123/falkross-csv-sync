@@ -2,7 +2,7 @@ name: Pobierz CSV co godzinę
 
 on:
   schedule:
-    - cron: '0 * * * *'  # co godzinę
+    - cron: '0 * * * *'
   workflow_dispatch:
 
 jobs:
@@ -10,8 +10,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
+      - name: Checkout repo z tokenem
         uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Zainstaluj PHP
         run: sudo apt-get install php-cli -y
@@ -44,3 +46,5 @@ jobs:
           git add falkross_de_clean.csv
           git commit -m "Aktualizacja CSV `date`" || echo "Brak zmian"
           git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
