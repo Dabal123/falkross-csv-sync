@@ -2,7 +2,7 @@ name: Pobierz CSV co godzinę
 
 on:
   schedule:
-    - cron: '0 * * * *'
+    - cron: '0 * * * *'  # co godzinę
   workflow_dispatch:
 
 jobs:
@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo z PAT
+      - name: Checkout repo z tokenem i zachowaniem poświadczeń
         uses: actions/checkout@v3
         with:
           token: ${{ secrets.PAT_TOKEN }}
@@ -19,7 +19,7 @@ jobs:
       - name: Zainstaluj PHP
         run: sudo apt-get install php-cli -y
 
-      - name: Pobierz plik CSV i przetwórz
+      - name: Pobierz plik CSV i przetwórz (z debugiem)
         run: |
           echo "<?php
           \$username = getenv('FALKROSS_USER');
@@ -33,7 +33,11 @@ jobs:
           \$response = curl_exec(\$ch);
           curl_close(\$ch);
 
+          file_put_contents(\"response_raw.txt\", \$response);
+
           \$lines = explode(\"\\n\", \$response);
+          file_put_contents(\"lines_count.txt\", count(\$lines));
+
           array_shift(\$lines);
           file_put_contents(\"falkross_de_clean.csv\", implode(\"\\n\", \$lines));
           ?>" > script.php
@@ -44,6 +48,6 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add falkross_de_clean.csv
-          git commit -m "Aktualizacja CSV `date`" || echo "Brak zmian"
+          git add falkross_de_clean.csv response_raw.txt lines_count.txt
+          git commit -m "Aktualizacja CSV i debug `date`" || echo "Brak zmian"
           git push
