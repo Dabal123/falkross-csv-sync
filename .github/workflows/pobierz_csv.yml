@@ -20,9 +20,14 @@ jobs:
         run: sudo apt-get install php-cli -y
 
       - name: Pobierz plik CSV i przetwórz
+        env:
+          FALKROSS_USER: ${{ secrets.FALKROSS_USER }}
+          FALKROSS_PASS: ${{ secrets.FALKROSS_PASS }}
         run: |
           echo "<?php
-          \$url = 'https://102094-5-nadrukinasztuki:0k5X62WD@ws.falk-ross.eu/webservice/R03_000/stockinfo/falkross_de.csv';
+          \$user = getenv('FALKROSS_USER');
+          \$pass = getenv('FALKROSS_PASS');
+          \$url = \"https://\$user:\$pass@ws.falk-ross.eu/webservice/R03_000/stockinfo/falkross_de.csv\";
 
           \$ch = curl_init();
           curl_setopt(\$ch, CURLOPT_URL, \$url);
